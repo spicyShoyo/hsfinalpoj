@@ -28,4 +28,9 @@ def run_all():
     res = [list(key) for key in dic if dic[key] > 1]
     return res
 
-print(run_all())
+def main():
+    cur_res = run_all()
+    for i in range(len(cur_res)):
+        print("Circle-"+str(i), cur_res[i])
+
+main()
