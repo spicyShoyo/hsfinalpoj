@@ -8,8 +8,9 @@ class CircleMiner:
         self.cur_ego_network = EgoNetwork(node_id)
         self.min_support_rate = min_support_rate
         self.featname_list = {} #remove "anonymized feature i"
-        for key in self.cur_ego_network.featname_list:
-            self.featname_list[key] = '-'.join(self.cur_ego_network.featname_list[key].split(';')[:-1])
+        self.featname_list = self.cur_ego_network.featname_list
+        # for key in self.cur_ego_network.featname_list:
+        #     self.featname_list[key] = '-'.join(self.cur_ego_network.featname_list[key].split(';')[:-1])
 
 
     def mine_all_circle(self):

@@ -28,9 +28,23 @@ def run_all():
     res = [list(key) for key in dic if dic[key] > 1]
     return res
 
+def run_all_except(n):
+    dic = {}
+    for node_id in NODE_ID_LIST:
+        if node_id == n:
+            continue
+        res = mine_node(node_id)
+        for i in res:
+            if i in dic:
+                dic[i] += 1
+            else:
+                dic[i] = 1
+    res = [list(key) for key in dic if dic[key] > 1]
+    return res
+
 def main():
     cur_res = run_all()
     for i in range(len(cur_res)):
         print("Circle-"+str(i), cur_res[i])
 
-main()
+#main()
