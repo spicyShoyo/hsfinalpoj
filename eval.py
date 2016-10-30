@@ -1,3 +1,8 @@
+from zliu import run_all, run_all_except
+from egonetwork import EgoNetwork
+
+NODE_ID_LIST = [0, 107, 1684, 1912, 3437, 348, 3980, 414, 686, 698]
+
 class evaluation:
     def __init__(self, res, node_id):
         self.res = res
@@ -66,3 +71,15 @@ class evaluation:
 
         res = first + second
         return res
+"""
+s = 0
+for i in NODE_ID_LIST:
+    res = run_all_except(i)
+    a = evaluation(res, i)
+    a.eval()
+    res = a.get_score()
+    print("node", i, ":", res)
+    s += res
+
+print("avg: ", s / 10.0)
+"""
