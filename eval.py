@@ -40,7 +40,7 @@ class evaluation:
             if b in self.dic[a]:
                 return self.dic[a][b]
         anb = a.intersection(b)
-        res = len(anb) / (len(a) + len(b) - len(anb))
+        res = len(anb) * 1.0 / (len(a) + len(b) - len(anb))
         if a not in self.dic:
             self.dic[a] = {}
         if b not in self.dic:
@@ -71,7 +71,7 @@ class evaluation:
 
         res = first + second
         return res
-
+"""
 s = 0
 for i in NODE_ID_LIST:
     res = run_all_except(i)
@@ -82,3 +82,4 @@ for i in NODE_ID_LIST:
     s += res
 
 print("avg: ", s / 10.0)
+"""
