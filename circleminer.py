@@ -28,7 +28,7 @@ class CircleMiner:
         return res
 
     def mine_circle(self, circle_id):
-        cur_fp_obj = FreqPattern(self.cur_ego_network, circle_id, self.min_support_rate)
+        cur_fp_obj = FreqPattern(self.cur_ego_network, self.cur_ego_network.circle_list[circle_id], self.min_support_rate)
         res = cur_fp_obj.get_freq_pattern_list()
         return res
 

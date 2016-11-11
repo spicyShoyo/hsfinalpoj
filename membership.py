@@ -1,8 +1,10 @@
 import numpy as np
+from freqpattern import FreqPattern
 from egonetwork import EgoNetwork
 from girvannewman import GirvanNewman
 
 NODE_ID_LIST = [0, 107, 1684, 1912, 3437, 348, 3980, 414, 686, 698]
+MIN_SUPPORT_RATE = 0.7
 
 '''
 todo:
@@ -25,6 +27,8 @@ class Membership:
         self.largest_scc = None
         self.local_node_id_dic = {}
         self.local_node_id_dic_back = {}
+        self.group_list = None
+        self.featname_list = self.cur_ego_network.featname_list
 
     def fix(self):
         cur_file = open(self.edge_file_name, 'r')
@@ -98,7 +102,7 @@ class Membership:
         group_list_sorted = group_list_sorted[0:-1]
 
         for cur_group in group_list_sorted:
-            if (len(cur_group) >= 2):
+            if (len(cur_group) >= 3):
                 self.small_scc.append(cur_group)
 
     def get_scc_edge_encode(self, scc):
@@ -132,16 +136,45 @@ class Membership:
                 local_group_dic[cur_group] = []
             local_group_dic[cur_group].append(self.local_node_id_dic_back[key])
         res = list(local_group_dic.values()) + self.small_scc
-        return res
+        return res  #global encoded
 
     def mine_group_list(self):
         self.check_num_group()
         self.get_group_list()
-        self.mine_largest_scc()
+        self.group_list = self.mine_largest_scc()
+
+    def get_feat_list(self, group):
+        cur_fp_obj = FreqPattern(self.cur_ego_network, group, MIN_SUPPORT_RATE)
+        res = cur_fp_obj.get_freq_pattern_list()
+        return res
+
+    def mine_all_circle(self):
+        decoded_group_list = []
+        for group in self.group_list:
+            decoded_group_list.append([])
+            for node in group:
+                decoded_group_list[-1].append(self.node_id_dic_back[node])
+
+        res = []
+        for group in decoded_group_list:
+            if len(group) <= 2:
+                continue
+            print(len(group))
+            cur_res = self.get_feat_list(group)
+            max_pattern_len = sorted(cur_res.keys())[-1]
+            max_pattern_list = [x[0] for x in cur_res[max_pattern_len]]
+            cur_circle_feature = []
+            for cur_feat_list in max_pattern_list:
+                cur_circle_feature += cur_feat_list
+            cur_circle_featname = [self.featname_list[x] for x in cur_circle_feature]
+            res.append(cur_circle_featname)
+            print(cur_circle_featname)
+        return res
 
 
 a = Membership(0)
 a.mine_group_list()
+a.mine_all_circle()
 
 
 # for i in NODE_ID_LIST:

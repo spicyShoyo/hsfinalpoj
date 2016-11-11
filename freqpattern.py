@@ -2,13 +2,13 @@ from egonetwork import EgoNetwork
 from apriori import Apriori
 
 class FreqPattern:
-    def __init__(self, ego_network, circle_id, min_support_rate):
+    def __init__(self, ego_network, cur_circle, min_support_rate):
         self.min_support_rate = min_support_rate
         self.item_list = ego_network.featname_list
         self.transaction_vec = {}
         self.transaction_list = {}
         self.transactions = []
-        for transaction_id in ego_network.circle_list[circle_id]:
+        for transaction_id in cur_circle:
             self.transaction_vec[transaction_id] = ego_network.node_feat[transaction_id]
             self.transaction_list[transaction_id] =  [x for x in range(len(self.transaction_vec[transaction_id])) if self.transaction_vec[transaction_id][x] == 1]
             self.transactions.append(self.transaction_list[transaction_id])
