@@ -72,6 +72,27 @@ class evaluation:
         res = first + second
         return res
 
+    def clique_check(self):
+        res = []
+        for cur_circle in self.circle_list_detected:
+            connect_sum = 0
+            disconnect_sum = 0
+            for i in range(len(cur_circle)):
+                for j in range(i + 1, len(cur_circle)):
+                    node0 = cur_circle[i]
+                    node1 = cur_circle[j]
+                    #print(cur_circle)
+                    if node0 in self.network.adj_mat:
+                        if node1 in self.network.adj_mat[node0]:
+                            connect_sum += 1
+                    else:
+                        disconnect_sum += 1
+            coeff = connect_sum / (connect_sum + disconnect_sum)
+            if coeff > 0.2:
+                res.append(cur_circle)
+            print(coeff)
+        self.circle_list_detected = res
+
 s = 0
 for i in NODE_ID_LIST:
     res = run_all_except(i)
