@@ -2,7 +2,7 @@ import numpy as np
 from betweenness import BetweenessExact, BetweenessAppro
 FILES = ["Barabasi.txt", "ErdosRenyi.txt", "WattsStrogatz.txt"]
 
-EXPECTED_GROUP_NUM = 5 #magic number
+EXPECTED_GROUP_NUM = 8 #magic number
 
 class GirvanNewman:
     def __init__(self, edge_list, num_node):

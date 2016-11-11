@@ -15,6 +15,7 @@ todo:
 '''
 class Membership:
     def __init__(self, node_id):
+        self.node_id = node_id
         self.edge_file_name = "facebook/" + str(node_id) + ".edges"
         self.cur_ego_network = EgoNetwork(node_id)
         self.num_node = len(self.cur_ego_network.node_feat)
@@ -148,13 +149,30 @@ class Membership:
         res = cur_fp_obj.get_freq_pattern_list()
         return res
 
+    def out_res(self, decoded_group_list):
+        fn = "./out/" + str(self.node_id) + ".groups"
+        cur_file = open(fn, 'w')
+        for cur_group in decoded_group_list:
+            cur_str = ""
+            first = True
+            for node in cur_group:
+                if first:
+                    cur_str += str(node)
+                    first = False
+                else:
+                    cur_str += ("," + str(node))
+            cur_str += "\n"
+            cur_file.write(cur_str)
+        cur_file.close()
+
     def mine_all_circle(self):
+        self.mine_group_list()
         decoded_group_list = []
         for group in self.group_list:
             decoded_group_list.append([])
             for node in group:
                 decoded_group_list[-1].append(self.node_id_dic_back[node])
-
+        self.out_res(decoded_group_list)
         res = []
         for group in decoded_group_list:
             if len(group) <= 2:
@@ -173,11 +191,10 @@ class Membership:
 
 
 a = Membership(0)
-a.mine_group_list()
 a.mine_all_circle()
 
 
 # for i in NODE_ID_LIST:
 #     print(i)
 #     a = Membership(i)
-#     a.mine_group_list()
+#     a.mine_all_circle()
