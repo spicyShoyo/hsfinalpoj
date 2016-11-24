@@ -27,62 +27,6 @@ class Cesana:
         self.w_f_t = None
         self.f_f_t = None
 
-    def get_conductance(self, node_idx):
-            #http://courses.cms.caltech.edu/cs139/notes/lecture10.pdf
-        if node_idx not in self.neighbor_dic:
-            return 0
-        neighbor_hood = {}
-        deltas = 0
-        for i in self.neighbor_dic[node_idx]:
-            if i in self.neighbor_dic:
-                for j in self.neighbor_dic:
-                    if not (j in self.neighbor_dic[node_idx] or j == node_idx):
-                        deltas += 1
-        ds = 0
-        dvs = 0
-        for i in range(self.u_num):
-            if i in self.neighbor_dic:
-                if (i in self.neighbor_dic[node_idx] or i == node_idx):
-                    ds += len(self.neighbor_dic[i])
-                else:
-                    dvs += len(self.neighbor_dic[i])
-        # print(ds, dvs)
-        # return deltas / (min(ds, dvs))  #need to deal with node with no neighbor
-        return deltas / ((ds + dvs) / 2)
-
-    def init_f_mat(self):
-        '''
-        since the smallest conductance is the ones with no neighbors
-        '''
-        count = 0
-        for i in range(self.u_num):
-            if len(self.neighbor_dic[i]) == 0:
-                self.f_mat[i][count] = self.delta
-                count += 1
-            if count == CIRCLE_NUM - 2:
-                break
-
-    def init_f_mat_conductance(self):
-        conductance_dic = {}
-        for i in range(self.u_num):
-            conductance_dic[i] = self.get_conductance(i)
-        circle_count = 0
-        for i in range(self.u_num):
-            minimal = True
-            if i in self.neighbor_dic:
-                for j in self.neighbor_dic[i]:
-                    if conductance_dic[j] < i:
-                        minimal = False
-            if minimal:
-                self.f_mat[i][circle_count] = 1
-                if i in self.neighbor_dic:
-                    for j in self.neighbor_dic[i]:
-                        self.f_mat[j][circle_count] = 1
-                circle_count += 1
-            if circle_count == CIRCLE_NUM - 2:
-                break
-
-
     def get_x_mat(self):
         node_feat = {}
         feat_file_name = "facebook/" + self.ego_id + ".feat"
@@ -111,8 +55,71 @@ class Cesana:
         return res
 
         '''
-        below for updating f
+        above for init and file io
         =========================
+        below for init f_mat
+        '''
+    def init_f_mat(self):
+        '''
+        since the smallest conductance is the ones with no neighbors
+        '''
+        count = 0
+        for i in range(self.u_num):
+            if len(self.neighbor_dic[i]) == 0:
+                self.f_mat[i][count] = self.delta
+                count += 1
+            if count == CIRCLE_NUM - 2:
+                break
+
+    def get_conductance(self, node_idx):
+            #http://courses.cms.caltech.edu/cs139/notes/lecture10.pdf
+        if node_idx not in self.neighbor_dic:
+            return 0
+        neighbor_hood = {}
+        deltas = 0
+        for i in self.neighbor_dic[node_idx]:
+            if i in self.neighbor_dic:
+                for j in self.neighbor_dic:
+                    if not (j in self.neighbor_dic[node_idx] or j == node_idx):
+                        deltas += 1
+        ds = 0
+        dvs = 0
+        for i in range(self.u_num):
+            if i in self.neighbor_dic:
+                if (i in self.neighbor_dic[node_idx] or i == node_idx):
+                    ds += len(self.neighbor_dic[i])
+                else:
+                    dvs += len(self.neighbor_dic[i])
+        # print(ds, dvs)
+        # return deltas / (min(ds, dvs))  #need to deal with node with no neighbor
+        return deltas / ((ds + dvs) / 2)
+
+    def init_f_mat_conductance(self):
+        conductance_dic = {}
+        for i in range(self.u_num):
+            conductance_dic[i] = self.get_conductance(i)
+        circle_count = 0
+        for i in range(self.u_num):
+            minimal = True
+            if i in self.neighbor_dic:
+                for j in self.neighbor_dic[i]:
+                    if conductance_dic[j] < i:
+                        minimal = False
+            if minimal:
+                self.f_mat[i][circle_count] = 1
+                if i in self.neighbor_dic:
+                    for j in self.neighbor_dic[i]:
+                        self.f_mat[j][circle_count] = 1
+                circle_count += 1
+            if circle_count == CIRCLE_NUM - 2:
+                break
+
+
+
+        '''
+        above for init f_mat
+        =========================
+        below for setup for next update
         '''
     def update_w_f_t(self):
         self.w_f_t = self.w_mat @ self.f_mat.T
@@ -129,8 +136,11 @@ class Cesana:
     def get_q_k(self, k):
         return self.w_f_t[k]
 
-    def f_u_v(self):
-        return self.f_f_t[u][v]
+        '''
+        above for setup for next update
+        =========================
+        below for update f
+        '''
 
     def d_lg_fu(self, u, c):
         sum_first = 0
@@ -152,15 +162,13 @@ class Cesana:
     def f_new_uc(self, u, c):
         temp = self.f_mat[u][c] + ALPHA * (self.d_lg_fu(u, c) + self.d_lx_fu(u, c))
         return max(0, temp)
-        '''
-        =========================
-        above for updating f
-        '''
 
         '''
-        below for updating w
+        above for update f
         =========================
+        below for update w
         '''
+
     def sum_d_log_wkc(self, k, c):
         res = self.x_mat[:, k] - self.get_q_k(k) @ self.f_mat[:, c]
         return np.sum(res)
@@ -169,11 +177,12 @@ class Cesana:
         s = self.sum_d_log_wkc(k, c)
         temp = s - LAMBDA * np.sign(self.w_mat[k][c])
         return self.w_mat[k][c] + temp
-        '''
-        =========================
-        above for updating w
-        '''
 
+        '''
+        above for update w
+        =========================
+        below for update functions
+        '''
     def update_f(self):
         for u in range(len(self.new_f_mat)):
             for c in range(len(self.new_f_mat[u])):
@@ -194,6 +203,12 @@ class Cesana:
         self.update_f()
         self.update_w()
         self.get_eval()
+
+        '''
+        above for update functions
+        =========================
+        below for evaluation
+        '''
 
     def get_circle(self):
         print(self.f_mat)
@@ -221,6 +236,5 @@ class Cesana:
 a = Cesana(0)
 a.init_f_mat()
 a.get_eval()
-# for i in range(10): #try updating two times first
 while True:
     a.update()
