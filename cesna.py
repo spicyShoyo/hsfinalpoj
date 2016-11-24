@@ -25,6 +25,7 @@ class Cesana:
         self.delta = (-np.log(1 - 1 / self.u_num)) ** 0.5
         self.f_mat[:, -1] = 1   #add one for not having zero
         self.w_f_t = None
+        self.f_f_t = None
 
     def get_conductance(self, node_idx):
             #http://courses.cms.caltech.edu/cs139/notes/lecture10.pdf
@@ -113,16 +114,23 @@ class Cesana:
         below for updating f
         =========================
         '''
-    def q(self):
+    def update_w_f_t(self):
         self.w_f_t = self.w_mat @ self.f_mat.T
         self.w_f_t.clip(-20, 20)
         self.w_f_t = 1 / (1 + np.exp(self.w_f_t))
+
+    def update_f_f_t(self):
+        self.f_t_t = self.f_mat @ self.f_mat.T
+        self.f_t_t = np.exp(-self.f_t_t)
 
     def get_q_u(self, u):
         return self.w_f_t[:, u]
 
     def get_q_k(self, k):
         return self.w_f_t[k]
+
+    def f_u_v(self):
+        return self.f_f_t[u][v]
 
     def d_lg_fu(self, u, c):
         sum_first = 0
@@ -131,7 +139,7 @@ class Cesana:
             if v == u:
                 continue
             if v in self.neighbor_dic[u]:
-                temp = np.exp(-(self.f_mat[u] @ self.f_mat[v].T))
+                temp = self.f_t_t[u][v]
                 sum_first += self.f_mat[v][c] * temp / (1 - temp)
             else:
                 sum_second += self.f_mat[v][c]
@@ -180,7 +188,9 @@ class Cesana:
         self.w_mat = self.new_w_mat.copy()
 
     def update(self):
-        self.q()
+        self.update_w_f_t()
+        self.update_f_f_t()
+
         self.update_f()
         self.update_w()
         self.get_eval()
