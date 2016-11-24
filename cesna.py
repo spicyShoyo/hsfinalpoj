@@ -24,6 +24,7 @@ class Cesana:
         self.new_w_mat = np.zeros((len(self.network.featname_list), CIRCLE_NUM))
         self.delta = (-np.log(1 - 1 / self.u_num)) ** 0.5
         self.f_mat[:, -1] = 1   #add one for not having zero
+        self.w_f_t = None
 
     def get_conductance(self, node_idx):
             #http://courses.cms.caltech.edu/cs139/notes/lecture10.pdf
@@ -112,18 +113,16 @@ class Cesana:
         below for updating f
         =========================
         '''
-    def q_uk(self, u, k):
-        s = self.w_mat[k] @ self.f_mat[u]   #should .T in theory, but numpy ignores that
-        if s > 20:
-            s = 20
-        if s < -20:
-            s = -20
-        return 1 / (1 + np.exp(-s))
+    def q(self):
+        self.w_f_t = self.w_mat @ self.f_mat.T
+        self.w_f_t.clip(-20, 20)
+        self.w_f_t = 1 / (1 + np.exp(self.w_f_t))
 
-    def q_u(self, u):
-        s = self.w_mat @ self.f_mat[u].T
-        s = np.clip(s, a_min=-20, a_max=20)
-        return 1 / (1 + np.exp(-s))
+    def get_q_u(self, u):
+        return self.w_f_t[:, u]
+
+    def get_q_k(self, k):
+        return self.w_f_t[k]
 
     def d_lg_fu(self, u, c):
         sum_first = 0
@@ -139,7 +138,7 @@ class Cesana:
         return sum_first - sum_second
 
     def d_lx_fu(self, u, c):
-        res = np.sum((self.x_mat[u] - self.q_u(u)) @ self.w_mat[:, c])
+        res = np.sum((self.x_mat[u] - self.get_q_u(u)) @ self.w_mat[:, c])
         return res
 
     def f_new_uc(self, u, c):
@@ -154,14 +153,12 @@ class Cesana:
         below for updating w
         =========================
         '''
-
-    def d_log_wkc(self, u, k, c):
-        return (self.x_mat[u][k] - self.q_uk(u, k)) * self.f_mat[u][c]
+    def sum_d_log_wkc(self, k, c):
+        res = self.x_mat[:, k] - self.get_q_k(k) @ self.f_mat[:, c]
+        return np.sum(res)
 
     def w_new_kc(self, k, c):
-        s = 0
-        for u in range(self.u_num):
-            s += self.d_log_wkc(u, k, c)
+        s = self.sum_d_log_wkc(k, c)
         temp = s - LAMBDA * np.sign(self.w_mat[k][c])
         return self.w_mat[k][c] + temp
         '''
@@ -183,6 +180,7 @@ class Cesana:
         self.w_mat = self.new_w_mat.copy()
 
     def update(self):
+        self.q()
         self.update_f()
         self.update_w()
         self.get_eval()
