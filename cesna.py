@@ -1,4 +1,5 @@
 from egonetwork import EgoNetwork
+from evaluation import Evaluation
 import numpy as np
 
 CIRCLE_NUM = 11
@@ -14,7 +15,6 @@ class Cesana:
         self.neighbor_dic = {}
         self.x_mat = self.get_x_mat() #exclude ego, numpy array, node index starting from 0
         self.f_mat = np.zeros((len(self.network.node_feat)-1, CIRCLE_NUM)) #exclude ego, numpy array
-        self.f_mat[:, -1] = 1   #add one for not having zero
         # self.w_mat = np.random.rand((len(self.network.featname_list) * CIRCLE_NUM)).reshape((len(self.network.featname_list), CIRCLE_NUM))
         self.w_mat = np.zeros((len(self.network.featname_list), CIRCLE_NUM))
         self.k_num = (len(self.network.featname_list))
@@ -23,6 +23,7 @@ class Cesana:
         self.new_f_mat = np.zeros((len(self.network.node_feat)-1, CIRCLE_NUM))
         self.new_w_mat = np.zeros((len(self.network.featname_list), CIRCLE_NUM))
         self.delta = (-np.log(1 - 1 / self.u_num)) ** 0.5
+        self.f_mat[:, -1] = 1   #add one for not having zero
 
     def get_conductance(self, node_idx):
             #http://courses.cms.caltech.edu/cs139/notes/lecture10.pdf
@@ -48,6 +49,18 @@ class Cesana:
         return deltas / ((ds + dvs) / 2)
 
     def init_f_mat(self):
+        '''
+        since the smallest conductance is the ones with no neighbors
+        '''
+        count = 0
+        for i in range(self.u_num):
+            if len(self.neighbor_dic[i]) == 0:
+                self.f_mat[i][count] = self.delta
+                count += 1
+            if count == CIRCLE_NUM - 2:
+                break
+
+    def init_f_mat_conductance(self):
         conductance_dic = {}
         for i in range(self.u_num):
             conductance_dic[i] = self.get_conductance(i)
@@ -101,6 +114,15 @@ class Cesana:
         '''
     def q_uk(self, u, k):
         s = self.w_mat[k] @ self.f_mat[u]   #should .T in theory, but numpy ignores that
+        if s > 20:
+            s = 20
+        if s < -20:
+            s = -20
+        return 1 / (1 + np.exp(-s))
+
+    def q_u(self, u):
+        s = self.w_mat @ self.f_mat[u].T
+        s = np.clip(s, a_min=-20, a_max=20)
         return 1 / (1 + np.exp(-s))
 
     def d_lg_fu(self, u, c):
@@ -117,10 +139,8 @@ class Cesana:
         return sum_first - sum_second
 
     def d_lx_fu(self, u, c):
-        s = 0
-        for k in range(self.k_num):
-            s += (self.x_mat[u][k] - self.q_uk(u, k)) * self.w_mat[k][c]
-        return s
+        res = np.sum((self.x_mat[u] - self.q_u(u)) @ self.w_mat[:, c])
+        return res
 
     def f_new_uc(self, u, c):
         temp = self.f_mat[u][c] + ALPHA * (self.d_lg_fu(u, c) + self.d_lx_fu(u, c))
@@ -154,33 +174,45 @@ class Cesana:
             for c in range(len(self.new_f_mat[u])):
                 self.new_f_mat[u][c] = self.f_new_uc(u, c)
         self.f_mat = self.new_f_mat.copy()
+        self.f_mat[:, -1] = 1   #add one for not having zero
 
     def update_w(self):
         for k in range(len(self.new_w_mat)):
             for c in range(len(self.new_w_mat[k])):
                 self.new_w_mat[k][c] = self.w_new_kc(k, c)
         self.w_mat = self.new_w_mat.copy()
-        self.get_circle
 
     def update(self):
         self.update_f()
         self.update_w()
-        self.get_circle()
+        self.get_eval()
 
     def get_circle(self):
         print(self.f_mat)
         print(self.w_mat)
-        for c in range(CIRCLE_NUM):
+        for c in range(CIRCLE_NUM-1): #leave last one
             print("Cirlce", c, end="")
             for u in range(self.u_num):
-                if self.f_mat[u][c] > self.delta:
+                if self.f_mat[u][c] >= self.delta:
                     print(", ", self.idx_dic_back[u],  end="")
             print()
 
+    def get_eval(self):
+        circle_list_detected = [list(self.idx_dic.keys())]
+        for c in range(CIRCLE_NUM-1):
+            cur_circle_list = []
+            for u in range(self.u_num):
+                if self.f_mat[u][c] >= self.delta:   #hack
+                    cur_circle_list.append(self.idx_dic_back[u])
+            if len(cur_circle_list) > 0:
+                circle_list_detected.append(cur_circle_list)
+        eval_obj = Evaluation(circle_list_detected, self.network)
+        res = eval_obj.get_score()
+        print(res)
 
-
-a = Cesana(1912)
+a = Cesana(0)
 a.init_f_mat()
-a.get_circle()
-for i in range(2): #try updating two times first
+a.get_eval()
+# for i in range(10): #try updating two times first
+while True:
     a.update()
