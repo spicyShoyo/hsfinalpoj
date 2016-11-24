@@ -197,7 +197,7 @@ class Cesana:
                     print(", ", self.idx_dic_back[u],  end="")
             print()
 
-    def get_eval(self):
+    def get_eval(self): #jaccard
         circle_list_detected = [list(self.idx_dic.keys())]
         for c in range(CIRCLE_NUM-1):
             cur_circle_list = []
