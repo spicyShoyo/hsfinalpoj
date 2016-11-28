@@ -123,7 +123,7 @@ class CesnaPlus:
         self.update_f()
         self.update_q() #since f is updated
         self.update_w()
-        self.get_eval()
+        # self.get_eval()
 
     def get_eval(self): #jaccard
         circle_list_detected = [list(self.id2idx_dic.keys())]
@@ -137,8 +137,26 @@ class CesnaPlus:
         eval_obj = Evaluation(circle_list_detected, self.network)
         res = eval_obj.get_score()
         print(res)
+        return res
 
-a = CesnaPlus(1912)
-a.get_eval()
-while True:
-    a.update()
+# NODE_ID_LIST = [0, 107, 1684, 1912, 3437, 348, 3980, 414, 686, 698]
+#
+# for i in NODE_ID_LIST:
+#     print(i)
+#     a = CesnaPlus(i)
+#     res = 0
+#     for j in range(10):
+#         a.update()
+#         res = max(res, a.get_eval())
+#     print("\t", res)
+
+def test(n):
+    a = CesnaPlus(n)
+    res = a.get_eval()
+    for i in range(30):
+        a.update()
+        res = max(0, a.get_eval())
+    print(n, "best: ", res)
+
+
+test(348)
