@@ -29,6 +29,18 @@ class CesnaPlus:
         self.w_mat += 1 / self.num_k
         self.init_f_mat()
 
+        self.adj_mat = np.zeros((self.num_u, self.num_u))
+        self.neg_adj_mat = np.zeros((self.num_u, self.num_u))
+        for i in range(self.num_u):
+            for j in range(self.num_u):
+                if j in self.neighbor_dic[i]:
+                    self.adj_mat[i][j] = 1
+                    self.adj_mat[j][i] = 1
+                else:
+                    self.neg_adj_mat[i][j] = 1
+                    self.neg_adj_mat[j][i] = 1
+            self.neg_adj_mat[i][i] = 0
+
     def preprocessing(self):
         node_feat = {}
         feat_file_name = "facebook/" + self.ego_id + ".feat"
@@ -72,48 +84,25 @@ class CesnaPlus:
     def update_f_ft(self):
         self.f_ft_mat = self.f_mat @ self.f_mat.T
 
-    def d_lg_fu(self, u, c):
-        first_part = 0
-        second_part = 0
-        for v in range(self.num_u):
-            if v == u:
-                continue
-            if v in self.neighbor_dic[u]:
-                temp = np.exp(-self.f_ft_mat[u][v])
-                first_part += self.f_mat[v][c] * (temp) / (1 - temp)
-            else:
-                second_part += self.f_mat[v][c]
-        return first_part - second_part
+    def get_new_f_mat(self):
+        exp_f_ft = np.exp(-self.f_ft_mat)
+        exp_f_ft = exp_f_ft / (1 - exp_f_ft)
+        f_t_mat = self.f_mat.T
+        d_lg_fu_mat = f_t_mat @ (self.adj_mat * exp_f_ft)- f_t_mat @ self.neg_adj_mat
+        d_lx_fu_mat = (self.x_mat - self.q_mat) @ self.w_mat
+        res = f_t_mat + ALPHA * (d_lg_fu_mat + d_lx_fu_mat.T)
+        res[res<0] = 0
+        return res.T
 
-    def d_lx_fu(self, u, c):
-        return (self.x_mat[u] - self.q_mat[u]) @ self.w_mat[:, c]
-
-    def f_new_uc(self, u, c):
-        temp = self.f_mat[u][c] + ALPHA * (self.d_lg_fu(u, c) + self.d_lx_fu(u, c))
-        return max(0, temp)
-
-    def sum_d_log_wkc(self, k, c):
-        return (self.x_mat[:, k] - self.q_mat[:, k]) @ self.f_mat[:, c]
-
-    def w_new_kc(self, k, c):
-        temp = self.sum_d_log_wkc(k, c) - LAMBDA * np.sign(self.w_mat[k][c])
-        return self.w_mat[k][c] + ALPHA * temp
+    def get_new_w_mat(self):
+        return self.w_mat + ALPHA * ((self.x_mat - self.q_mat).T @ self.f_mat - LAMBDA * np.sign(self.w_mat))
 
     def update_f(self):
-        new_f_mat = np.zeros((self.num_u, self.num_c))
-        for u in range(self.num_u):
-            for c in range(self.num_c):
-                new_f_mat[u][c] = self.f_new_uc(u, c)
-        self.f_mat = new_f_mat
+        self.f_mat = self.get_new_f_mat()
         self.f_mat[:, -1] = 1
 
     def update_w(self):
-        new_w_mat = np.zeros((self.num_k, self.num_c))
-        for k in range(self.num_k):
-            for c in range(self.num_c):
-                new_w_mat[k][c] = self.w_new_kc(k, c)
-        self.w_mat = new_w_mat
-
+        self.w_mat = self.get_new_w_mat()
         #normalize?
         self.w_mat /= np.linalg.norm(self.w_mat, axis=0)
 
@@ -159,4 +148,4 @@ def test(n):
     print(n, "best: ", res)
 
 
-test(348)
+test(0)
