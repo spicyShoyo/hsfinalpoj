@@ -144,8 +144,8 @@ def test(n):
     res = a.get_eval()
     for i in range(30):
         a.update()
-        res = max(0, a.get_eval())
+        res = max(res, a.get_eval())
     print(n, "best: ", res)
 
 
-test(0)
+test(1912)
