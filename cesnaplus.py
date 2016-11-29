@@ -80,6 +80,7 @@ class CesnaPlus:
 
     def update_q(self):
         self.q_mat = (self.w_mat @ self.f_mat.T).T #to align Q_uk
+        self.q_mat = 1 / (1 + np.exp(self.q_mat))
 
     def update_f_ft(self):
         self.f_ft_mat = self.f_mat @ self.f_mat.T
