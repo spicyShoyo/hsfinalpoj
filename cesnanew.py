@@ -28,7 +28,7 @@ class CesnaNew:
         self.f_ft_mat = None
 
         self.f_mat[:, -1] = 1
-        self.init_f_mat()
+        self.init_f_mat_conductance()
 
         self.adj_mat = np.zeros((self.num_u, self.num_u))
         self.neg_adj_mat = np.zeros((self.num_u, self.num_u))
@@ -69,6 +69,46 @@ class CesnaNew:
             else:
                 for neighbor_node_id in self.network.adj_mat[node_id]:
                     self.neighbor_dic[self.id2idx_dic[node_id]][self.id2idx_dic[neighbor_node_id]] = 1
+
+    def get_conductance(self, node_idx):
+            #http://courses.cms.caltech.edu/cs139/notes/lecture10.pdf
+        if node_idx not in self.neighbor_dic:
+            return 0
+        deltas = 0
+        for i in self.neighbor_dic[node_idx]:
+            if i in self.neighbor_dic:
+                for j in self.neighbor_dic:
+                    if not (j in self.neighbor_dic[node_idx] or j == node_idx):
+                        deltas += 1
+        ds = 0
+        dvs = 0
+        for i in range(self.num_u):
+            if i in self.neighbor_dic:
+                if i in self.neighbor_dic[node_idx] or i == node_idx:
+                    ds += len(self.neighbor_dic[i])
+                else:
+                    dvs += len(self.neighbor_dic[i])
+        return deltas / ((ds + dvs) / 2)
+
+    def init_f_mat_conductance(self):
+        conductance_dic = {}
+        for i in range(self.num_u):
+            conductance_dic[i] = self.get_conductance(i)
+        circle_count = 0
+        for i in range(self.num_u):
+            minimal = True
+            if i in self.neighbor_dic:
+                for j in self.neighbor_dic[i]:
+                    if conductance_dic[j] < i:
+                        minimal = False
+            if minimal:
+                self.f_mat[i][circle_count] = self.delta
+                if i in self.neighbor_dic:
+                    for j in self.neighbor_dic[i]:
+                        self.f_mat[j][circle_count] = self.delta
+                circle_count += 1
+            if circle_count == NUM_CIRCLE - 1:
+                break
 
     def init_f_mat(self):
         '''
