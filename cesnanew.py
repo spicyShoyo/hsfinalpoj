@@ -210,7 +210,7 @@ class CesnaNew:
         return res
 
 NODE_ID_LIST = [0, 107, 1684, 1912, 3437, 348, 3980, 414, 686, 698]
-NODE_ID_LIST = [348, 3980, 414, 686, 698]
+# NODE_ID_LIST = [348, 3980, 414, 686, 698]
 def test(n):
     print(n, "----------------------")
     a = CesnaNew(n)
