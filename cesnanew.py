@@ -166,7 +166,7 @@ def test(n):
     print(n, "----------------------")
     a = CesnaNew(n)
     res = 0
-    for i in range(20):
+    for i in range(21):
         a.update()
         res = a.get_eval()
         if i % 5 == 0:
