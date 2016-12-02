@@ -69,6 +69,12 @@ class CesnaNew:
                     self.neighbor_dic[self.id2idx_dic[node_id]][self.id2idx_dic[neighbor_node_id]] = 1
 
     def init_f_mat(self):
+        '''
+        Change this function
+        self.f_mat[node_idx][circle_id] = self.delta
+        If use the origin node_id from the files
+        The node_idx = self.id2idx_dic[node_id]
+        '''
         count = 0
         for i in range(self.num_u):
             if len(self.neighbor_dic[i]) == 0:
