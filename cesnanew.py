@@ -174,7 +174,7 @@ def test(n):
     print(n, "result: ", res)
     print("----------------------")
 
-# for n in NODE_ID_LIST:
-#     test(n)
+for n in NODE_ID_LIST:
+    test(n)
 
-test(698)
+# test(698)
