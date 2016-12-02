@@ -87,39 +87,39 @@ class CesnaNew:
         '''
         apriori below
         '''
-        res = run_all_except(self.ego_id)
-        obj = evaluation(res, self.ego_id)
-        obj.eval()
-        l = sorted(obj.circle_list_detected, key=lambda x:len(x), reverse=True)[1:]
-        for i in range(NUM_CIRCLE-1):
-            for node_id in l[i]:
-                if node_id not in self.id2idx_dic:
-                    continue
-                else:
-                    self.f_mat[self.id2idx_dic[node_id]][i] = self.delta
-        '''
-        use feature
-        '''
         # res = run_all_except(self.ego_id)
         # obj = evaluation(res, self.ego_id)
         # obj.eval()
-        # temp = []
-        # for i in range(len(obj.circle_list_feature)):
-        #     temp.append((obj.circle_list_feature[i], obj.circle_list_detected[i]))
-        # l = sorted(temp, key=lambda x:len(x[1]), reverse=True)[1:]
+        # l = sorted(obj.circle_list_detected, key=lambda x:len(x), reverse=True)[1:]
         # for i in range(NUM_CIRCLE-1):
-        #     for node_id in l[i][1]:
+        #     for node_id in l[i]:
         #         if node_id not in self.id2idx_dic:
         #             continue
         #         else:
         #             self.f_mat[self.id2idx_dic[node_id]][i] = self.delta
-        #     feat_count = 0
-        #     for feat_name in l[i][0]:
-        #         if feat_name in self.network.featname_list_back:
-        #             feat_count += 1
-        #     for feat_name in l[i][0]:
-        #         if feat_name in self.network.featname_list_back:
-        #             self.w_mat[self.network.featname_list_back[feat_name]][i] = 1 / feat_count
+        '''
+        use feature
+        '''
+        res = run_all_except(self.ego_id)
+        obj = evaluation(res, self.ego_id)
+        obj.eval()
+        temp = []
+        for i in range(len(obj.circle_list_feature)):
+            temp.append((obj.circle_list_feature[i], obj.circle_list_detected[i]))
+        l = sorted(temp, key=lambda x:len(x[1]), reverse=True)[1:]
+        for i in range(NUM_CIRCLE-1):
+            for node_id in l[i][1]:
+                if node_id not in self.id2idx_dic:
+                    continue
+                else:
+                    self.f_mat[self.id2idx_dic[node_id]][i] = self.delta
+            feat_count = 0
+            for feat_name in l[i][0]:
+                if feat_name in self.network.featname_list_back:
+                    feat_count += 1
+            for feat_name in l[i][0]:
+                if feat_name in self.network.featname_list_back:
+                    self.w_mat[self.network.featname_list_back[feat_name]][i] = 1 / feat_count
 
     def update_q(self):
         self.q_mat = (self.w_mat @ self.f_mat.T).T #to align Q_uk
