@@ -116,7 +116,11 @@ class CesnaNew:
 
     def update_w(self):
         self.w_mat = self.get_new_w_mat()
-        self.w_mat /= np.linalg.norm(self.w_mat, axis=0)
+        norm = np.linalg.norm(self.w_mat, axis=0)
+        for i in range(len(norm)):
+            if norm[i] == 0:
+                norm[i] = 1
+        self.w_mat /= norm
 
     def prop(self):
         exp_f_ft = np.exp(-self.f_ft_mat)
@@ -174,7 +178,7 @@ def test(n):
     print(n, "result: ", res)
     print("----------------------")
 
+# test(686)
+
 for n in NODE_ID_LIST:
     test(n)
-
-# test(698)
