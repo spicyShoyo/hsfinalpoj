@@ -10,6 +10,7 @@ class evaluation:
         self.feat_dic = {self.network.featname_list[key]: key for key in self.network.featname_list}
         self.feat_set = {key: frozenset([i for i, x in enumerate(self.network.node_feat[key]) if x != 0])for key in self.network.node_feat}
         self.circle_list_detected = []
+        self.circle_list_feature = []
         self.dic = {}
 
     def eval(self):
@@ -32,6 +33,7 @@ class evaluation:
             for node in self.feat_set:
                 if node not in dic:
                     cur_circle.append(node)
+            self.circle_list_feature .append(item_set)
             self.circle_list_detected.append(cur_circle)
         return
 
@@ -92,14 +94,14 @@ class evaluation:
                 res.append(cur_circle)
             print(coeff)
         self.circle_list_detected = res
-
-s = 0
-for i in NODE_ID_LIST:
-    res = run_all_except(i)
-    a = evaluation(res, i)
-    a.eval()
-    res = a.get_score()
-    print("node", i, ":", res)
-    s += res
-
-print("avg: ", s / 10.0)
+#
+# s = 0
+# for i in NODE_ID_LIST:
+#     res = run_all_except(i)
+#     a = evaluation(res, i)
+#     a.eval()
+#     res = a.get_score()
+#     print("node", i, ":", res)
+#     s += res
+#
+# print("avg: ", s / 10.0)

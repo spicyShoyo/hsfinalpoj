@@ -4,6 +4,7 @@ class EgoNetwork:
         self.circle_list = []
         self.adj_mat = {}
         self.featname_list = {}
+        self.featname_list_back = {}
         self.node_feat = {}
         self.read_files()
 
@@ -44,6 +45,7 @@ class EgoNetwork:
             featname_id = int(cur_list[0])
             featname = ' '.join(cur_list[1:])
             self.featname_list[featname_id] = featname
+            self.featname_list_back[featname] = featname_id
 
     def read_feat_list(self):
         feat_file_name = "facebook/" + self.ego_id + ".feat"

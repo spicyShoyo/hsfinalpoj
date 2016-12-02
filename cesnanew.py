@@ -1,5 +1,7 @@
 from egonetwork import EgoNetwork
 from evaluation import Evaluation
+from eval import evaluation
+from zliu import run_all_except
 import numpy as np
 
 NUM_CIRCLE = 6
@@ -82,6 +84,42 @@ class CesnaNew:
                 count += 1
             if count == self.num_c - 1:
                 break
+        '''
+        apriori below
+        '''
+        # res = run_all_except(self.ego_id)
+        # obj = evaluation(res, self.ego_id)
+        # obj.eval()
+        # l = sorted(obj.circle_list_detected, key=lambda x:len(x), reverse=True)[1:]
+        # for i in range(NUM_CIRCLE-1):
+        #     for node_id in l[i]:
+        #         if node_id not in self.id2idx_dic:
+        #             continue
+        #         else:
+        #             self.f_mat[self.id2idx_dic[node_id]][i] = self.delta
+        '''
+        use feature
+        '''
+        # res = run_all_except(self.ego_id)
+        # obj = evaluation(res, self.ego_id)
+        # obj.eval()
+        # temp = []
+        # for i in range(len(obj.circle_list_feature)):
+        #     temp.append((obj.circle_list_feature[i], obj.circle_list_detected[i]))
+        # l = sorted(temp, key=lambda x:len(x[1]), reverse=True)[1:]
+        # for i in range(NUM_CIRCLE-1):
+        #     for node_id in l[i][1]:
+        #         if node_id not in self.id2idx_dic:
+        #             continue
+        #         else:
+        #             self.f_mat[self.id2idx_dic[node_id]][i] = self.delta
+        #     feat_count = 0
+        #     for feat_name in l[i][0]:
+        #         if feat_name in self.network.featname_list_back:
+        #             feat_count += 1
+        #     for feat_name in l[i][0]:
+        #         if feat_name in self.network.featname_list_back:
+        #             self.w_mat[self.network.featname_list_back[feat_name]][i] = 1 / feat_count
 
     def update_q(self):
         self.q_mat = (self.w_mat @ self.f_mat.T).T #to align Q_uk
@@ -122,6 +160,7 @@ class CesnaNew:
 
     def update_w(self):
         self.w_mat = self.get_new_w_mat()
+        self.w_mat[self.w_mat<0] = 0
         norm = np.linalg.norm(self.w_mat, axis=0)
         for i in range(len(norm)):
             if norm[i] == 0:
@@ -171,20 +210,20 @@ class CesnaNew:
         return res
 
 NODE_ID_LIST = [0, 107, 1684, 1912, 3437, 348, 3980, 414, 686, 698]
-
+NODE_ID_LIST = [348, 3980, 414, 686, 698]
 def test(n):
     print(n, "----------------------")
     a = CesnaNew(n)
     res = 0
-    for i in range(21):
+    for i in range(31):
         a.update()
         res = a.get_eval()
-        if i % 5 == 0:
+        if i % 10 == 0:
             print("\t", "iter", i, ":", res)
     print(n, "result: ", res)
     print("----------------------")
 
-# test(686)
+# test(3980)
 
 for n in NODE_ID_LIST:
     test(n)
