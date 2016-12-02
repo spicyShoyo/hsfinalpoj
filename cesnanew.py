@@ -77,26 +77,26 @@ class CesnaNew:
         If use the origin node_id from the files
         The node_idx = self.id2idx_dic[node_id]
         '''
-        count = 0
-        for i in range(self.num_u):
-            if len(self.neighbor_dic[i]) == 0:
-                self.f_mat[i][count] = self.delta
-                count += 1
-            if count == self.num_c - 1:
-                break
+        # count = 0
+        # for i in range(self.num_u):
+        #     if len(self.neighbor_dic[i]) == 0:
+        #         self.f_mat[i][count] = self.delta
+        #         count += 1
+        #     if count == self.num_c - 1:
+        #         break
         '''
         apriori below
         '''
-        # res = run_all_except(self.ego_id)
-        # obj = evaluation(res, self.ego_id)
-        # obj.eval()
-        # l = sorted(obj.circle_list_detected, key=lambda x:len(x), reverse=True)[1:]
-        # for i in range(NUM_CIRCLE-1):
-        #     for node_id in l[i]:
-        #         if node_id not in self.id2idx_dic:
-        #             continue
-        #         else:
-        #             self.f_mat[self.id2idx_dic[node_id]][i] = self.delta
+        res = run_all_except(self.ego_id)
+        obj = evaluation(res, self.ego_id)
+        obj.eval()
+        l = sorted(obj.circle_list_detected, key=lambda x:len(x), reverse=True)[1:]
+        for i in range(NUM_CIRCLE-1):
+            for node_id in l[i]:
+                if node_id not in self.id2idx_dic:
+                    continue
+                else:
+                    self.f_mat[self.id2idx_dic[node_id]][i] = self.delta
         '''
         use feature
         '''
