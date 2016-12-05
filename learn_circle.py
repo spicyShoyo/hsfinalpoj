@@ -4,6 +4,12 @@ from functools import reduce
 from load_data import get_all_features
 from load_data import generate_training_data, generate_testing_data
 
+
+'''
+using k-clique mining circles
+Note that this code run in Python2
+'''
+
 def lms(example, weight_and_theta, step_size):
     return weight_and_theta + step_size * (example[0].reshape(-1, 1).dot(
                               example[1].reshape(1, -1) -

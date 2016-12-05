@@ -1,6 +1,11 @@
 from egonetwork import EgoNetwork
 from apriori import Apriori
 
+'''
+Apriori mining circles
+'''
+
+
 class FreqPattern:
     def __init__(self, ego_network, cur_circle, min_support_rate):
         self.min_support_rate = min_support_rate

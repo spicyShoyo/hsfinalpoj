@@ -7,11 +7,7 @@ NODE_ID_LIST = [0, 107, 1684, 1912, 3437, 348, 3980, 414, 686, 698]
 MIN_SUPPORT_RATE = 0.7
 
 '''
-todo:
-    1. create potential communities
-    2. mine community common features
-    3. use ego features
-    4. refractor
+Mine circles based on membership
 '''
 class Membership:
     def __init__(self, node_id):

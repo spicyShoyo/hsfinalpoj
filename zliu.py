@@ -1,5 +1,10 @@
 from circleminer import CircleMiner
 
+
+'''
+evaluate apriori
+'''
+
 MIN_SUPPORT_RATE = 0.7 #magic number
 NODE_ID_LIST = [0, 107, 1684, 1912, 3437, 348, 3980, 414, 686, 698]
 def mine_node(node_id):

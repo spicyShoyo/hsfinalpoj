@@ -1,6 +1,11 @@
 from zliu import run_all, run_all_except
 from egonetwork import EgoNetwork
 
+'''
+Evaluate the apriori method
+Plase uncomment the last few lines
+'''
+
 NODE_ID_LIST = [0, 107, 1684, 1912, 3437, 348, 3980, 414, 686, 698]
 
 class evaluation:

@@ -1,6 +1,9 @@
 from egonetwork import EgoNetwork
 from freqpattern import FreqPattern
+'''
+Mine cicle based on apriori
 
+'''
 MIN_CIRCLE_LEN = 6  #magic number
 
 class CircleMiner:

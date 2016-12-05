@@ -1,6 +1,11 @@
 import numpy as np
 import random
 
+'''
+This class calculate the betweeness of a node
+'''
+
+
 class BetweenessExact:
     def __init__(self, network, num_nodes):
         self.network = network

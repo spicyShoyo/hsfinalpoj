@@ -3,6 +3,10 @@ from load_data import get_adj_list
 from eval import evaluation
 from functools import reduce
 
+'''
+using k-clique mining circles
+Note that this code run in Python2
+'''
 def prune_graph(adj_list, min_size):
     removed_nodes = [n for n in adj_list.keys() if len(adj_list[n]) < min_size]
     while len(removed_nodes) > 0:

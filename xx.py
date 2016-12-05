@@ -5,7 +5,10 @@ import numpy as np
 NUM_CIRCLE = 6
 ALPHA = 0.5
 LAMBDA = 1
-
+'''
+testing only
+please ignore
+'''
 
 class CesnaPlus:
     def __init__(self, ego_id):

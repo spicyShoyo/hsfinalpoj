@@ -4,6 +4,10 @@ FILES = ["Barabasi.txt", "ErdosRenyi.txt", "WattsStrogatz.txt"]
 
 EXPECTED_GROUP_NUM = 8 #magic number
 
+'''
+use GirvanNewman mining circles
+'''
+
 class GirvanNewman:
     def __init__(self, edge_list, num_node):
         self.num_node = num_node

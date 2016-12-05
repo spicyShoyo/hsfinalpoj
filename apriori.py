@@ -1,3 +1,8 @@
+'''
+perform Apriori algorithm
+'''
+
+
 class Apriori:
     def __init__(self, transactions):
         self.transactions = transactions

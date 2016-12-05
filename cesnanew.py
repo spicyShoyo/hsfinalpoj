@@ -7,10 +7,18 @@ import numpy as np
 NUM_CIRCLE = 6
 ALPHA = 0.5
 LAMBDA = 1
+'''
+This is our final implementation of CESNA framework.
+There are also 3 ways of initilization.
+conductance, no neighbor node and apriori
+'''
 
 
 class CesnaNew:
     def __init__(self, ego_id):
+        '''
+        Initialize
+        '''
         self.ego_id = str(ego_id)
         self.network = EgoNetwork(ego_id)
         self.idx2id_dic = {}
@@ -43,6 +51,9 @@ class CesnaNew:
             self.neg_adj_mat[i][i] = 0
 
     def preprocessing(self):
+        '''
+        preprocessing
+        '''
         node_feat = {}
         feat_file_name = "facebook/" + self.ego_id + ".feat"
         feat_file = open(feat_file_name, 'r')
@@ -71,6 +82,9 @@ class CesnaNew:
                     self.neighbor_dic[self.id2idx_dic[node_id]][self.id2idx_dic[neighbor_node_id]] = 1
 
     def get_conductance(self, node_idx):
+        '''
+        helper function for initialize by conductance
+        '''
             #http://courses.cms.caltech.edu/cs139/notes/lecture10.pdf
         if node_idx not in self.neighbor_dic:
             return 0
@@ -91,6 +105,9 @@ class CesnaNew:
         return deltas / ((ds + dvs) / 2)
 
     def init_f_mat_conductance(self):
+        '''
+        initialize by conductance
+        '''
         conductance_dic = {}
         for i in range(self.num_u):
             conductance_dic[i] = self.get_conductance(i)
@@ -112,10 +129,10 @@ class CesnaNew:
 
     def init_f_mat(self):
         '''
-        Change this function
-        self.f_mat[node_idx][circle_id] = self.delta
-        If use the origin node_id from the files
-        The node_idx = self.id2idx_dic[node_id]
+        other initialize methods
+        '''
+        '''
+        no neighbor node below
         '''
         # count = 0
         # for i in range(self.num_u):
@@ -138,7 +155,7 @@ class CesnaNew:
         #         else:
         #             self.f_mat[self.id2idx_dic[node_id]][i] = self.delta
         '''
-        use feature
+        apriori and feature
         '''
         res = run_all_except(self.ego_id)
         obj = evaluation(res, self.ego_id)
@@ -162,19 +179,32 @@ class CesnaNew:
                     self.w_mat[self.network.featname_list_back[feat_name]][i] = 1 / feat_count
 
     def update_q(self):
+        '''
+        update Q formula
+        optimize by matrix multiplication
+        '''
         self.q_mat = (self.w_mat @ self.f_mat.T).T #to align Q_uk
 
         self.q_mat = self.q_mat.clip(-20, 20)
         self.q_mat = 1 / (1 + np.exp(self.q_mat))
 
     def update_f_ft(self):
+        '''
+        update f dot f.T
+        '''
         self.f_ft_mat = self.f_mat @ self.f_mat.T
 
     def get_new_w_mat(self):
-
+        '''
+        update w matrix
+        optmized by matrix multiplication
+        '''
         return self.w_mat + ALPHA * ((self.x_mat - self.q_mat).T @ self.f_mat - LAMBDA * np.sign(self.w_mat))
 
     def lgfu(self,u, c):
+        '''
+        get the lgfu part for update f matrix
+        '''
         res = 0
         for v in range(self.num_u):
             if v == u:
@@ -187,18 +217,31 @@ class CesnaNew:
         return res
 
     def lxfu(self, u, c):
+        '''
+        get the lxfu part for update f matrix
+        '''
         return (self.x_mat[u] - self.q_mat[u]) @ self.w_mat[:, c]
 
     def update_f_u_c(self, u, c):
+        '''
+        update single cell of f matrix
+        '''
         self.f_mat[u][c] = max(0, self.f_mat[u][c] + ALPHA * (self.lgfu(u, c) + self.lxfu(u, c)))
 
     def update_f(self):
+        '''
+        update whole f matrix
+        '''
         for u in range(self.num_u):
             for c in range(self.num_c):
                 self.update_f_u_c(u, c)
         self.f_mat[:, -1] = 1
 
     def update_w(self):
+        '''
+        update w matrix
+        and normalize
+        '''
         self.w_mat = self.get_new_w_mat()
         self.w_mat[self.w_mat<0] = 0
         norm = np.linalg.norm(self.w_mat, axis=0)
@@ -208,6 +251,9 @@ class CesnaNew:
         self.w_mat /= norm
 
     def prop(self):
+        '''
+        get score of the current state
+        '''
         exp_f_ft = np.exp(-self.f_ft_mat)
         exp_f_ft = exp_f_ft / (1 - exp_f_ft)
         f_t_mat = self.f_mat.T

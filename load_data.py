@@ -1,6 +1,12 @@
 import numpy as np
 data_dir_ = "./facebook/"
 
+
+'''
+using k-clique mining circles
+Note that this code run in Python2
+'''
+
 def get_adj_list(node_id):
     node_ids = np.loadtxt(data_dir_ + str(node_id) + ".feat", dtype=int)[:, 0]
     adj_list = {i : [] for i in node_ids}

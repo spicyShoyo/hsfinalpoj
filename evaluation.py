@@ -1,3 +1,8 @@
+'''
+Evaluate the result based on jaccard methods
+'''
+
+
 class Evaluation:
     def __init__(self, circle_list_detected, network):
         self.circle_list_detected = circle_list_detected

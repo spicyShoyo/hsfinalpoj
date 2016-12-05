@@ -6,7 +6,11 @@ NUM_CIRCLE = 11
 ALPHA = 0.5
 LAMBDA = 1
 
-
+'''
+This is CESNA implemented all in matrix multiplication.
+However, we realize that the f matrix is dependent on each cell's update.
+Please refer to cesnanew.py for our final implementation.
+'''
 class CesnaPlus:
     def __init__(self, ego_id):
         self.ego_id = str(ego_id)

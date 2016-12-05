@@ -6,6 +6,9 @@ CIRCLE_NUM = 11
 ALPHA = 0.5
 LAMBDA = 1
 
+'''
+Please refer to cesnanew.py for final implementation
+'''
 
 class Cesana:
     def __init__(self, ego_id):

@@ -1,3 +1,8 @@
+'''
+Our infrastructure class for ego network
+'''
+
+
 class EgoNetwork:
     def __init__(self, ego_id):
         self.ego_id = str(ego_id)
